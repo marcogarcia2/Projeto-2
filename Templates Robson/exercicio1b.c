@@ -44,9 +44,13 @@ int busca_mover_para_frente(const elemento, const N, int entradas[]){
     for (i = 0; i < N; i++) 
 
         if (entradas[i] == elemento) { // achou o elemento
-            int aux = entradas[i];
-            entradas[i] = entradas[0];
-            entradas[0] = aux;
+            if(i != 0){
+
+                int aux = entradas[i];
+                entradas[i] = entradas[0];
+                entradas[0] = aux;
+            }
+            
             x++;
         }
 

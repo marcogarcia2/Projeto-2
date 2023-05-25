@@ -10,6 +10,11 @@ unsigned char typedef bool;
 #define TRUE  1
 #define FALSE 0
 
+typedef struct {
+    int key;
+    int position;
+} index_table;
+
 int* ler_inteiros(const char * arquivo, const int n)
 {
     FILE* f = fopen(arquivo, "r");
@@ -36,11 +41,21 @@ double finaliza_tempo()
     return ((double) (_fim - _ini)) / CLOCKS_PER_SEC;
 }
 
-int busca_sequencial_indexada(const int tabela[], int N, int elemento, const int tabela_i[], int t){
+int busca_sequencial_indexada(int consultas[], int N, int elemento, const index_table tabela[], int T){
 
+    int i, j, x = 0;
 
-    return 1;
+    for(int i = 0; i < T; i++)
+        if(tabela[i].key > elemento) break;
+    
+    if (i == 0) return 0;
 
+    for (j = tabela[i-1].position; j < N; j++){
+        if (consultas[j] == elemento)
+            x++;
+    }
+
+    return x;
 }
 
 void counting_sort(int A[], long posicao, long tam){
@@ -100,32 +115,25 @@ int main(int argc, char const *argv[])
 
     int* entradas = ler_inteiros("inteiros_entrada.txt", N);
     int* consultas = ler_inteiros("inteiros_busca.txt", N);
-    
+
+
     // ordenar entrada
     radix_sort(entradas, N);
-    
-    /*
-    int flag = TRUE;
-    for (int i = 0; i < N-1; i++){
 
-        if (entradas[i] > entradas[i+1]){
-            printf("ERRO!\n");
-            flag = FALSE;
-            break;
-        }
-    }
-    if (flag) printf("Lista Ordenada\n");
-    */
-
-    // -------------
+    // Definindo o tamanhdo da Tabela de Índices
+    int T = 5;
 
     // criar tabela de indice
-
+    index_table *tabela = (index_table*) malloc(sizeof(int) * T);
+    for (int i = 0; i < T; i++){
+        tabela[i].position = i * (N / T); // 0, 10000, 20000 ...
+        tabela[i].key = consultas[tabela[i].position]; // consultas[0], consultas[10000] ...
+    }
 
     // realizar consultas na tabela de indices 
     inicia_tempo();
     for (int i = 0; i < N; i++) {
-        // buscar o elemento consultas[i] na entrada
+        encontrados += busca_sequencial_indexada(consultas, N, entradas[i], tabela, T);
     }
     double tempo_busca = finaliza_tempo();
 

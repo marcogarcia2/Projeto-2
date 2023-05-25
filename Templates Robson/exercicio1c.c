@@ -44,9 +44,13 @@ int busca_transposicao(const elemento, const N, int entradas[]){
     for (i = 0; i < N; i++) 
 
         if (entradas[i] == elemento) { // achou o elemento
-            int aux = entradas[i];
-            entradas[i] = entradas[i-1];
-            entradas[i-1] = aux;
+            
+            if (i != 0){
+                int aux = entradas[i];
+                entradas[i] = entradas[i-1];
+                entradas[i-1] = aux;
+            }
+            
             x++;
         }
     
