@@ -41,17 +41,36 @@ double finaliza_tempo()
     return ((double) (_fim - _ini)) / CLOCKS_PER_SEC;
 }
 
-int busca_sequencial_indexada(int entradas[], int N, int elemento, const index_table tabela[], int T){
+// int busca_sequencial_indexada(int entradas[], int N, int elemento, const index_table tabela[], int T){
 
+//     int i, j, x = 0;
+
+//     for(int i = 0; i < T; i++)
+//         if(tabela[i].key > elemento) break;
+
+//     if (i == 0){
+//         if(tabela[i].key > elemento)
+//             return 0;
+//     }
+
+//     for (j = tabela[i-1].position; j < N; j++){
+//         if (entradas[j] == elemento)
+//             x++;
+//     }
+
+//     return x;
+// }
+
+int busca_sequencial_indexada(int entradas[], int N, int elemento, const index_table tabela[], int T){
     int i, j, x = 0;
 
-    for(int i = 0; i < T; i++)
-        if(tabela[i].key > elemento) break;
-    
-    if (i == 0) return 0;
+    for(i = 0; i < T && elemento > tabela[i].key; i++);
 
-    for (j = tabela[i-1].position; j < N; j++){
-        if (entradas[j] == elemento)
+    if(i == 0)
+        return 0;
+    
+    for (j = tabela[i - 1].position; j < N; j++){
+        if (elemento == entradas[j])
             x++;
     }
 
@@ -117,18 +136,18 @@ int main(int argc, char const *argv[])
     int* consultas = ler_inteiros("inteiros_busca.txt", N);
 
     // copiar o vetor de entradas, para não alterar o arquivo
-    int* copia = (int *) malloc(sizeof(int) * N);
-    for (int i = 0; i < N; i++)
-        copia[i] = entradas[i];
+    // int* copia = (int *) malloc(sizeof(int) * N);
+    // for (int i = 0; i < N; i++)
+    //     copia[i] = entradas[i];
 
     // ordenar entrada
-    radix_sort(copia, N);
+    radix_sort(entradas, N);
 
     // Definindo o tamanho da Tabela de Índices
     int T = N / index_size; // T = 5;
 
     // criar tabela de indice
-    index_table *tabela = (index_table*) malloc(sizeof(int) * T);
+    index_table *tabela = (index_table*) malloc(sizeof(index_table) * T);
     for (int i = 0; i < T; i++){
         tabela[i].position = i * index_size; // 0, 10000, 20000 ...
         tabela[i].key = consultas[tabela[i].position]; // consultas[0], consultas[10000] ...
@@ -137,7 +156,8 @@ int main(int argc, char const *argv[])
     // realizar consultas na tabela de indices 
     inicia_tempo();
     for (int i = 0; i < N; i++) {
-        encontrados += busca_sequencial_indexada(copia, N, consultas[i], tabela, T);
+
+        encontrados += busca_sequencial_indexada(entradas, N, consultas[i], tabela, T);
     }
     double tempo_busca = finaliza_tempo();
 
