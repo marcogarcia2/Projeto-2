@@ -36,7 +36,7 @@ double finaliza_tempo()
     return ((double) (_fim - _ini)) / CLOCKS_PER_SEC;
 }
 
-int busca_sequencial(const elemento, const N, const entradas[]){
+int busca_sequencial(const int elemento, const int N, const int entradas[]){
 
     int x = 0;
 
@@ -66,6 +66,9 @@ int main(int argc, char const *argv[])
 
     printf("Tempo de busca    :\t%fs\n", tempo_busca);
     printf("Itens encontrados :\t%d\n", encontrados);
+
+    free(entradas);
+    free(consultas);
 
     return 0;
 }

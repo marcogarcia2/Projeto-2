@@ -36,7 +36,7 @@ double finaliza_tempo()
     return ((double) (_fim - _ini)) / CLOCKS_PER_SEC;
 }
 
-int busca_transposicao(const elemento, const N, int entradas[]){
+int busca_transposicao(const int elemento, const int N, int entradas[]){
 
     int x = 0;
 
@@ -76,6 +76,9 @@ int main(int argc, char const *argv[])
 
     printf("Tempo de busca    :\t%fs\n", tempo_busca);
     printf("Itens encontrados :\t%d\n", encontrados);
+
+    free(entradas);
+    free(consultas);
 
     return 0;
 }
