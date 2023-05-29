@@ -41,33 +41,13 @@ double finaliza_tempo()
     return ((double) (_fim - _ini)) / CLOCKS_PER_SEC;
 }
 
-// int busca_sequencial_indexada(int entradas[], int N, int elemento, const index_table tabela[], int T){
-
-//     int i, j, x = 0;
-
-//     for(int i = 0; i < T; i++)
-//         if(tabela[i].key > elemento) break;
-
-//     if (i == 0){
-//         if(tabela[i].key > elemento)
-//             return 0;
-//     }
-
-//     for (j = tabela[i-1].position; j < N; j++){
-//         if (entradas[j] == elemento)
-//             x++;
-//     }
-
-//     return x;
-// }
-
 int busca_sequencial_indexada(int entradas[], int N, int elemento, const index_table tabela[], int T){
     int i, j, x = 0;
 
-    for(i = 0; i < T && elemento > tabela[i].key; i++);
+    for (i = 0; i < T && elemento > tabela[i].key; i++);
 
     if(i == 0)
-        return 0;
+        return 0; // elemento é menor que o menor elemento de entradas, logo, nao se encontra
     
     for (j = tabela[i - 1].position; j < N; j++){
         if (elemento == entradas[j])
@@ -135,11 +115,6 @@ int main(int argc, char const *argv[])
     int* entradas = ler_inteiros("inteiros_entrada.txt", N);
     int* consultas = ler_inteiros("inteiros_busca.txt", N);
 
-    // copiar o vetor de entradas, para não alterar o arquivo
-    // int* copia = (int *) malloc(sizeof(int) * N);
-    // for (int i = 0; i < N; i++)
-    //     copia[i] = entradas[i];
-
     // ordenar entrada
     radix_sort(entradas, N);
 
@@ -150,7 +125,7 @@ int main(int argc, char const *argv[])
     index_table *tabela = (index_table*) malloc(sizeof(index_table) * T);
     for (int i = 0; i < T; i++){
         tabela[i].position = i * index_size; // 0, 10000, 20000 ...
-        tabela[i].key = consultas[tabela[i].position]; // consultas[0], consultas[10000] ...
+        tabela[i].key = entradas[tabela[i].position]; // consultas[0], consultas[10000] ...
     }
 
     // realizar consultas na tabela de indices 
