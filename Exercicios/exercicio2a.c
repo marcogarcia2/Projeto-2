@@ -1,3 +1,9 @@
+/*
+Lucas Lima Romero 13676325
+Luciano Gonçalves Lopes Filho 13676520
+Marco Antonio Gaspar Garcia 11833581
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -20,83 +26,6 @@ typedef unsigned char bool;
 typedef char * string;
 
 #define MAX_STRING_LEN 20
-
-unsigned colisoes_h_div = 0;
-unsigned colisoes_h_mul = 0;
-unsigned encontrados_h_div = 0;
-unsigned encontrados_h_mul = 0;
-
-// TAD Lista encadeada
-
-typedef struct node{
-    long key;
-    struct node *next; // Não podemos colocar Node *next, pois o compilador lê de cima para baixo, e ainda não sabe o que é Node
-} No;
-
-typedef struct{
-    No *begin; // Ponteiro para o primeiro nó
-    No *end; // Ponteiro para o último nó, utilizado na hora de adicionar na cauda da lista
-    long size;
-} Lista;
-
-Lista *cria_Lista(){
-    Lista *L = (Lista *) calloc(1, sizeof(Lista)); 
-    L->begin = L->end = NULL;
-    L->size = 0;
-
-    return L;
-}
-
-void destroi_Lista(Lista **L_ref){
-    Lista *L = *L_ref;
-
-    No *p = L->begin;
-    No *aux = NULL; // Preciso do aux, pois ao dar free(p) eu perderia o p->next
-
-    while(p != NULL){
-        aux = p; // aux aponta para onde o p aponta (salvamos a posição)
-        p = p->next; // avançamos uma posição
-        free(aux);
-    }
-    free(L); // Desalocamos a lista em si
-
-    *L_ref = NULL;
-}
-
-No *cria_No(long key){
-    No *no = (No *) calloc(1, sizeof(No));
-    no->key = key;
-    no->next = NULL;
-
-    return no;
-}
-
-void insere_No(Lista *L, long key){
-    No *no = cria_No(key);
-
-    if(L->size == 0)
-        L->begin = L->end = no;
-    else{
-        L->end->next = no;
-        L->end = no;
-    }
-    L->size++;
-}
-
-int busca_Lista(const Lista *L, long key){
-
-    No *atual = L->begin;
-    while (atual != NULL){
-
-        if (atual->key == key)
-            return 1;
-
-        atual = atual->next;
-    }
-
-    return 0;
-}
-
 
 unsigned converter(string s) {
    unsigned h = 0;
@@ -133,43 +62,80 @@ double finaliza_tempo()
     return ((double) (_fim - _ini)) / CLOCKS_PER_SEC;
 }
 
-unsigned h_div(unsigned x)
+unsigned h_div(unsigned x, unsigned i)
 {
-    return (x % B);
+    return ((x % B) + i) % B;
 }
 
-unsigned h_mul(unsigned x)
+unsigned h_mul(unsigned x, unsigned i)
 {
     const double A = 0.6180;
-    return fmod(x * A, 1) * B;
+    return  ((int) ((fmod(x * A, 1) * B) + i)) % B;
 }
 
-void inicializar(Lista **tabela){
-    for(int i = 0; i < B; i++){
-        tabela[i] = cria_Lista();
+// marcacao: -1 indica posicao vazia, nunca utilizada
+void inicializar(long *vet){
+    for(int i = 0; i < B; i++)
+        vet[i] = -1;
+}
+
+// Funcoes utilizando o tratamento h_div
+long inserir_div(long *vet, long k){
+    long pos, i;
+    for(i = 0; i < B; i++){
+
+        pos = h_div(k, i); // calcula o local onde eu devo inserir
+        if(vet[pos] == -1){ // se estiver vazia eu insiro o elemento
+            vet[pos] = k; 
+            break;
+        }
     }
+
+    return i; // i sera o numero de colisoes
 }
 
-void inserir_div(Lista **tabela, long k){
-    long pos = h_div(k);
-    insere_No(tabela[pos], k);
-    colisoes_h_div += tabela[pos]->size - 1;
+long buscar_div(long *vet, long k){
+    long pos;
+    for(long i = 0; i < B; i++){
+        pos = h_div(k,i);
+        if(k == vet[pos]){
+            return 1; //elemento encontrado
+        }
+        else if(vet[pos] == -1)
+            break; // nao encontrado
+    }
+
+    return 0;
 }
 
-void buscar_div(Lista **tabela, long k){
-    long pos = h_div(k);
-    encontrados_h_div += busca_Lista(tabela[pos], k);
+
+// Funcoes utilizando o tratamento h_mul
+long inserir_mul(long *vet, long k){
+    long pos, i;
+    for(i = 0; i < B; i++){
+
+        pos = h_mul(k, i); // calcula o local onde eu devo inserir
+        if(vet[pos] == -1){ // se estiver vazia eu insiro o elemento
+            vet[pos] = k; 
+            break;
+        }
+    }
+
+    return i; // i sera o numero de colisoes
 }
 
-void inserir_mul(Lista **tabela, long k){
-    long pos = h_mul(k);
-    insere_No(tabela[pos], k);
-    colisoes_h_mul += tabela[pos]->size - 1;
-}
+long buscar_mul(long *vet, long k){
+    long pos;
+    for(long i = 0; i < B; i++){
+        pos = h_mul(k,i);
+        if(k == vet[pos]){
+            return 1; //elemento encontrado
+        }
+        else if(vet[pos] == -1)
+            break; // nao encontrado
+    }
 
-void buscar_mul(Lista **tabela, long k){
-    long pos = h_mul(k);
-    encontrados_h_mul += busca_Lista(tabela[pos], k);
+    return 0;
 }
 
 int main(int argc, char const *argv[])
@@ -177,38 +143,45 @@ int main(int argc, char const *argv[])
     string* insercoes = ler_strings("strings_entrada.txt", N);
     string* consultas = ler_strings("strings_busca.txt", M);
 
+    unsigned colisoes_h_div = 0;
+    unsigned colisoes_h_mul = 0;
+    unsigned encontrados_h_div = 0;
+    unsigned encontrados_h_mul = 0;
+
 
     // cria tabela hash com hash por divisão
-    Lista *tabela_div[B];
+    long tabela_div[B];
     inicializar(tabela_div);
 
     // inserção dos dados na tabela hash usando hash por divisão
     inicia_tempo();
     for (int i = 0; i < N; i++) {
         // inserir insercoes[i] na tabela hash
-        inserir_div(tabela_div, converter(insercoes[i]));
+        colisoes_h_div += inserir_div(tabela_div, converter(insercoes[i]));
     }
-
     double tempo_insercao_h_div = finaliza_tempo();
 
     // consulta dos dados na tabela hash usando hash por divisão
     inicia_tempo();
     for (int i = 0; i < M; i++) {
         // buscar consultas[i] na tabela hash
-        buscar_div(tabela_div, converter(consultas[i]));
+        encontrados_h_div += buscar_div(tabela_div, converter(consultas[i]));
     }
     double tempo_busca_h_div = finaliza_tempo();
 
+    // limpa a tabela hash com hash por divisão
+    inicializar(tabela_div); // -1 em tudo
+
 
     // cria tabela hash com hash por multiplicação
-    Lista *tabela_mul[B];
+    long tabela_mul[B];
     inicializar(tabela_mul);
 
     // inserção dos dados na tabela hash usando hash por multiplicação
     inicia_tempo();
     for (int i = 0; i < N; i++) {
         // inserir insercoes[i] na tabela hash
-        inserir_mul(tabela_mul, converter(insercoes[i]));
+        colisoes_h_mul += inserir_mul(tabela_mul, converter(insercoes[i]));
     }
     double tempo_insercao_h_mul = finaliza_tempo();
 
@@ -216,10 +189,12 @@ int main(int argc, char const *argv[])
     inicia_tempo();
     for (int i = 0; i < M; i++) {
         // buscar consultas[i] na tabela hash
-        buscar_mul(tabela_mul, converter(consultas[i]));
+        encontrados_h_mul += buscar_mul(tabela_mul, converter(consultas[i]));
     }
     double tempo_busca_h_mul = finaliza_tempo();
 
+    // limpa a tabela hash com hash por multiplicação
+    inicializar(tabela_mul); // -1 em tudo
 
     printf("Hash por Divisao\n");
     printf("Colisoes na insercao: %d\n", colisoes_h_div);
@@ -242,12 +217,6 @@ int main(int argc, char const *argv[])
         free(consultas[i]);
     }
     free(consultas); 
-
-    for (int i = 0; i < B; i ++){
-        destroi_Lista(&tabela_div[i]);
-        destroi_Lista(&tabela_mul[i]);
-    } 
-
 
     return 0;
 }

@@ -1,3 +1,9 @@
+/*
+Lucas Lima Romero 13676325
+Luciano Gonçalves Lopes Filho 13676520
+Marco Antonio Gaspar Garcia 11833581
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>

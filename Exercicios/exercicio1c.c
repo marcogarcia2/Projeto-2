@@ -1,3 +1,9 @@
+/*
+Lucas Lima Romero 13676325
+Luciano Gonçalves Lopes Filho 13676520
+Marco Antonio Gaspar Garcia 11833581
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -36,7 +42,7 @@ double finaliza_tempo()
     return ((double) (_fim - _ini)) / CLOCKS_PER_SEC;
 }
 
-int busca_mover_para_frente(const int elemento, const int N, int entradas[]){
+int busca_transposicao(const int elemento, const int N, int entradas[]){
 
     int x = 0;
 
@@ -44,15 +50,16 @@ int busca_mover_para_frente(const int elemento, const int N, int entradas[]){
     for (i = 0; i < N; i++) 
 
         if (entradas[i] == elemento) { // achou o elemento
-            if(i != 0){
-
+            
+            if (i != 0){
                 int aux = entradas[i];
-                entradas[i] = entradas[0];
-                entradas[0] = aux;
+                entradas[i] = entradas[i-1];
+                entradas[i-1] = aux;
             }
             
             x++;
         }
+    
 
     return x;
 }
@@ -64,12 +71,12 @@ int main(int argc, char const *argv[])
 
     int* entradas = ler_inteiros("inteiros_entrada.txt", N);
     int* consultas = ler_inteiros("inteiros_busca.txt", N);
-        
+
     // realiza busca sequencia com realocação
     inicia_tempo();
     for (int i = 0; i < N; i++) {
 
-        encontrados += busca_mover_para_frente(consultas[i], N, entradas);
+        encontrados += busca_transposicao(consultas[i], N, entradas);
     }
     double tempo_busca = finaliza_tempo();
 
