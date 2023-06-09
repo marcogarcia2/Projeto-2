@@ -144,39 +144,32 @@ unsigned h_mul(unsigned x)
     return fmod(x * A, 1) * B;
 }
 
-typedef struct{
-
-    Lista *vet[B];
-
-}hash;
-
-void inicializar(hash *tabela){
-
+void inicializar(Lista **tabela){
     for(int i = 0; i < B; i++){
-        tabela->vet[i] = cria_Lista();
+        tabela[i] = cria_Lista();
     }
 }
 
-void inserir_div(hash *tabela, long k){
+void inserir_div(Lista **tabela, long k){
     long pos = h_div(k);
-    insere_No(tabela->vet[pos], k);
-    colisoes_h_div += tabela->vet[pos]->size - 1;
+    insere_No(tabela[pos], k);
+    colisoes_h_div += tabela[pos]->size - 1;
 }
 
-void buscar_div(hash *tabela, long k){
+void buscar_div(Lista **tabela, long k){
     long pos = h_div(k);
-    encontrados_h_div += busca_Lista(tabela->vet[pos], k);
+    encontrados_h_div += busca_Lista(tabela[pos], k);
 }
 
-void inserir_mul(hash *tabela, long k){
+void inserir_mul(Lista **tabela, long k){
     long pos = h_mul(k);
-    insere_No(tabela->vet[pos], k);
-    colisoes_h_mul += tabela->vet[pos]->size - 1;
+    insere_No(tabela[pos], k);
+    colisoes_h_mul += tabela[pos]->size - 1;
 }
 
-void buscar_mul(hash *tabela, long k){
+void buscar_mul(Lista **tabela, long k){
     long pos = h_mul(k);
-    encontrados_h_mul += busca_Lista(tabela->vet[pos], k);
+    encontrados_h_mul += busca_Lista(tabela[pos], k);
 }
 
 int main(int argc, char const *argv[])
@@ -186,7 +179,7 @@ int main(int argc, char const *argv[])
 
 
     // cria tabela hash com hash por divisão
-    hash *tabela_div;
+    Lista *tabela_div[B];
     inicializar(tabela_div);
 
     // inserção dos dados na tabela hash usando hash por divisão
@@ -208,7 +201,7 @@ int main(int argc, char const *argv[])
 
 
     // cria tabela hash com hash por multiplicação
-    hash *tabela_mul;
+    Lista *tabela_mul[B];
     inicializar(tabela_mul);
 
     // inserção dos dados na tabela hash usando hash por multiplicação
@@ -251,9 +244,10 @@ int main(int argc, char const *argv[])
     free(consultas); 
 
     for (int i = 0; i < B; i ++){
-        destroi_Lista(&(tabela_div->vet[i]));
-        destroi_Lista(&(tabela_mul->vet[i]));
-    }
+        destroi_Lista(&tabela_div[i]);
+        destroi_Lista(&tabela_mul[i]);
+    } 
+
 
     return 0;
 }
