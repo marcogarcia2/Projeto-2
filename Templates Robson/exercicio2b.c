@@ -22,9 +22,6 @@ typedef char * string;
 
 #define MAX_STRING_LEN 20
 
-unsigned colisoes = 0;
-unsigned encontrados = 0;
-
 unsigned converter(string s) {
    unsigned h = 0;
    for (int i = 0; s[i] != '\0'; i++) 
@@ -85,20 +82,17 @@ void inicializar(long *vet){
 
 // Funcoes utilizando o tratamento h_div
 long inserir(long *vet, long k){
-    long pos;
-    for(long i = 0; i < B; i++){
-        pos = h(k, i); // calcula o endereco onde eu devo inserir
-        if(vet[pos] == -1 ||vet[pos] == -2){ // se esta vazia eu insiro
-            vet[pos] = k; // copia registro
-            return pos;
+    long pos, i;
+    for(i = 0; i < B; i++){
+
+        pos = h(k, i); // calcula o local onde eu devo inserir
+        if(vet[pos] == -1){ // se estiver vazia eu insiro o elemento
+            vet[pos] = k; 
+            break;
         }
-        if(vet[pos] == k){
-            return -1; // erro, elemento repetido
-        }
-        colisoes++;
     }
 
-    return -1; // tabela cheia, pois eu tentei de i do 0 a B-1 e nao consegui encaixar, quer dizer que a tabela esta cheia
+    return i; // i sera o numero de colisoes
 }
 
 long buscar(long *vet, long k){
@@ -106,13 +100,13 @@ long buscar(long *vet, long k){
     for(long i = 0; i < B; i++){
         pos = h(k,i);
         if(k == vet[pos]){
-            encontrados++;
-            return pos;
+            return 1; //elemento encontrado
         }
-        if(vet[pos] == -1)
-            return -1; // tabela com espaco
+        else if(vet[pos] == -1)
+            break; // nao encontrado
     }
-    return -1; // erro, tabela cheia
+
+    return 0;
 }
 
 int main(int argc, char const *argv[])
@@ -120,6 +114,9 @@ int main(int argc, char const *argv[])
 
     string* insercoes = ler_strings("strings_entrada.txt", N);
     string* consultas = ler_strings("strings_busca.txt", M);
+
+    unsigned colisoes = 0;
+    unsigned encontrados = 0;
 
     // cria tabela hash com hash por hash duplo
     long tabela[B];
@@ -130,7 +127,7 @@ int main(int argc, char const *argv[])
     inicia_tempo();
     for (int i = 0; i < N; i++) {
         // inserir insercoes[i] na tabela hash
-        inserir(tabela, converter(insercoes[i]));
+        colisoes += inserir(tabela, converter(insercoes[i]));
     }
     double tempo_insercao = finaliza_tempo();
 
@@ -138,7 +135,7 @@ int main(int argc, char const *argv[])
     inicia_tempo();
     for (int i = 0; i < M; i++) {
         // buscar consultas[i] na tabela hash
-        buscar(tabela, converter(consultas[i]));
+        encontrados += buscar(tabela, converter(consultas[i]));
     }
     double tempo_busca = finaliza_tempo();
 
