@@ -40,7 +40,7 @@ typedef struct{
 } Lista;
 
 Lista *cria_Lista(){
-    Lista *L = (Lista *) malloc(sizeof(Lista)); 
+    Lista *L = (Lista *) calloc(1, sizeof(Lista)); 
     L->begin = L->end = NULL;
     L->size = 0;
 
@@ -64,14 +64,14 @@ void destroi_Lista(Lista **L_ref){
 }
 
 No *cria_No(long key){
-    No *no = (No *) malloc(sizeof(No));
+    No *no = (No *) calloc(1, sizeof(No));
     no->key = key;
     no->next = NULL;
 
     return no;
 }
 
-int insere_No(Lista *L, long key){
+void insere_No(Lista *L, long key){
     No *no = cria_No(key);
 
     if(L->size == 0)
@@ -82,6 +82,21 @@ int insere_No(Lista *L, long key){
     }
     L->size++;
 }
+
+int busca_Lista(const Lista *L, long key){
+
+    No *atual = L->begin;
+    while (atual != NULL){
+
+        if (atual->key == key)
+            return 1;
+
+        atual = atual->next;
+    }
+
+    return 0;
+}
+
 
 unsigned converter(string s) {
    unsigned h = 0;
@@ -130,19 +145,39 @@ unsigned h_mul(unsigned x)
 }
 
 typedef struct{
+
     Lista *vet[B];
+
 }hash;
 
 void inicializar(hash *tabela){
-    for(int i = 0; i < B; i++)
+
+    for(int i = 0; i < B; i++){
         tabela->vet[i] = cria_Lista();
+    }
 }
 
-long inserir_div(hash *tabela, long k){
+void inserir_div(hash *tabela, long k){
     long pos = h_div(k);
-    return (insere_No(tabela->vet[pos], k) == 0) ? pos : -1;
+    insere_No(tabela->vet[pos], k);
+    colisoes_h_div += tabela->vet[pos]->size - 1;
 }
 
+void buscar_div(hash *tabela, long k){
+    long pos = h_div(k);
+    encontrados_h_div += busca_Lista(tabela->vet[pos], k);
+}
+
+void inserir_mul(hash *tabela, long k){
+    long pos = h_mul(k);
+    insere_No(tabela->vet[pos], k);
+    colisoes_h_mul += tabela->vet[pos]->size - 1;
+}
+
+void buscar_mul(hash *tabela, long k){
+    long pos = h_mul(k);
+    encontrados_h_mul += busca_Lista(tabela->vet[pos], k);
+}
 
 int main(int argc, char const *argv[])
 {
@@ -151,7 +186,7 @@ int main(int argc, char const *argv[])
 
 
     // cria tabela hash com hash por divisão
-    long tabela_div[B];
+    hash *tabela_div;
     inicializar(tabela_div);
 
     // inserção dos dados na tabela hash usando hash por divisão
@@ -160,6 +195,7 @@ int main(int argc, char const *argv[])
         // inserir insercoes[i] na tabela hash
         inserir_div(tabela_div, converter(insercoes[i]));
     }
+
     double tempo_insercao_h_div = finaliza_tempo();
 
     // consulta dos dados na tabela hash usando hash por divisão
@@ -170,12 +206,9 @@ int main(int argc, char const *argv[])
     }
     double tempo_busca_h_div = finaliza_tempo();
 
-    // limpa a tabela hash com hash por divisão
-    inicializar(tabela_div);
-
 
     // cria tabela hash com hash por multiplicação
-    long tabela_mul[B];
+    hash *tabela_mul;
     inicializar(tabela_mul);
 
     // inserção dos dados na tabela hash usando hash por multiplicação
@@ -194,8 +227,6 @@ int main(int argc, char const *argv[])
     }
     double tempo_busca_h_mul = finaliza_tempo();
 
-    // limpa a tabela hash com hash por multiplicação
-    inicializar(tabela_mul);
 
     printf("Hash por Divisao\n");
     printf("Colisoes na insercao: %d\n", colisoes_h_div);
@@ -218,6 +249,11 @@ int main(int argc, char const *argv[])
         free(consultas[i]);
     }
     free(consultas); 
+
+    for (int i = 0; i < B; i ++){
+        destroi_Lista(&(tabela_div->vet[i]));
+        destroi_Lista(&(tabela_mul->vet[i]));
+    }
 
     return 0;
 }

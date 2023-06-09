@@ -83,7 +83,7 @@ long inserir_div(long *vet, long k){
     long pos;
     for(long i = 0; i < B; i++){
         pos = h_div(k, i); // calcula o endereco onde eu devo inserir
-        if(vet[pos] == -1 ||vet[pos] == -2){ // se esta vazia eu insiro
+        if(vet[pos] == -1){ // se esta vazia eu insiro
             vet[pos] = k; // copia registro
             return pos;
         }
